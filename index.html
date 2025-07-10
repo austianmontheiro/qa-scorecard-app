@@ -37,5 +37,30 @@
     <button id="submitButton">Submit</button>
 
     <p id="averageDisplay"></p>
+
+<script src="https://assets.zendesk.com/apps/sdk/2.0/zaf_sdk.js"></script>
+<script>
+  const client = ZAFClient.init();
+
+  document.getElementById("submitButton").addEventListener("click", function () {
+    const scores = [
+      parseInt(document.getElementById("tone").value),
+      parseInt(document.getElementById("process").value),
+      parseInt(document.getElementById("fields").value),
+      parseInt(document.getElementById("resolution").value)
+    ];
+
+    const average = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
+    document.getElementById("averageDisplay").innerText = "Average: " + average;
+
+    // Set the custom ticket field value
+    client.set("ticket.customField:custom_field_33381915668503", average)
+      .then(() => {
+        console.log("QA Score updated to:", average);
+        alert("QA Score saved to ticket!");
+      });
+  });
+</script>
+    
   </body>
 </html>
