@@ -1,0 +1,97 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>QA Scorecard</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    label { display: block; margin-top: 10px; }
+    select, textarea, button { width: 100%; margin-top: 5px; padding: 8px; }
+    #scoreDisplay { margin-top: 15px; font-weight: bold; font-size: 16px; }
+  </style>
+  <script src="https://assets.zendesk.com/apps/sdk/2.0/zaf_sdk.js"></script>
+</head>
+<body>
+  <h2>QA Evaluation</h2>
+
+  <label for="tone">Tone</label>
+  <select id="tone">
+    <option value="">Select score</option>
+    <option value="0">0 - Poor</option>
+    <option value="1">1</option>
+    <option value="2">2</option>
+    <option value="3">3</option>
+    <option value="4">4</option>
+    <option value="5">5 - Excellent</option>
+  </select>
+
+  <label for="process">Process</label>
+  <select id="process">
+    <option value="">Select score</option>
+    <option value="0">0 - Poor</option>
+    <option value="1">1</option>
+    <option value="2">2</option>
+    <option value="3">3</option>
+    <option value="4">4</option>
+    <option value="5">5 - Excellent</option>
+  </select>
+
+  <label for="fields">Fields Populated</label>
+  <select id="fields">
+    <option value="">Select score</option>
+    <option value="0">0 - Poor</option>
+    <option value="1">1</option>
+    <option value="2">2</option>
+    <option value="3">3</option>
+    <option value="4">4</option>
+    <option value="5">5 - Excellent</option>
+  </select>
+
+  <label for="resolution">Resolution</label>
+  <select id="resolution">
+    <option value="">Select score</option>
+    <option value="0">0 - Poor</option>
+    <option value="1">1</option>
+    <option value="2">2</option>
+    <option value="3">3</option>
+    <option value="4">4</option>
+    <option value="5">5 - Excellent</option>
+  </select>
+
+  <label for="comments">Comments</label>
+  <textarea id="comments" placeholder="Add optional notes..."></textarea>
+
+  <div id="scoreDisplay">Average Score: --</div>
+
+  <button onclick="submitScore()">Submit</button>
+
+  <script>
+    const client = ZAFClient.init();
+
+    const selects = ['tone', 'process', 'fields', 'resolution'];
+    selects.forEach(id => {
+      document.getElementById(id).addEventListener('change', updateAverage);
+    });
+
+    function updateAverage() {
+      const scores = selects.map(id => parseInt(document.getElementById(id).value));
+      const valid = scores.filter(n => !isNaN(n));
+      const avg = valid.length ? (valid.reduce((a,b)=>a+b,0) / valid.length).toFixed(2) : "--";
+      document.getElementById("scoreDisplay").innerText = "Average Score: " + avg;
+    }
+
+    function submitScore() {
+      const scores = selects.map(id => parseInt(document.getElementById(id).value));
+      if (scores.some(isNaN)) {
+        alert("Please provide all 4 scores.");
+        return;
+      }
+
+      const average = (scores.reduce((a,b)=>a+b,0) / scores.length).toFixed(2);
+      client.set('ticket.customField:33381915668503', parseFloat(average));
+      alert("Submitted! QA Score saved as " + average);
+    }
+  </script>
+</body>
+</html>
