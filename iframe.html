@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>QA Scorecard</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    label { display: block; margin: 10px 0 5px; }
+    select, textarea, button { width: 100%; margin-bottom: 15px; }
+    button { padding: 10px; }
+  </style>
+  <script>
+    let client;
+    function calculateAndSubmit() {
+      const tone = parseInt(document.getElementById("tone").value);
+      const process = parseInt(document.getElementById("process").value);
+      const resolution = parseInt(document.getElementById("resolution").value);
+      const fields = parseInt(document.getElementById("fields").value);
+      const comments = document.getElementById("comments").value;
+
+      const total = tone + process + resolution + fields;
+
+      // Set QA score
+      client.set("ticket.customField:33381915668503", total);
+
+      // Optionally log or use comments
+      console.log("QA Score Submitted:", total);
+      console.log("Comments:", comments);
+
+      alert("Score submitted successfully! Total: " + total);
+    }
+
+    window.onload = function () {
+      client = ZAFClient.init();
+      document.getElementById("submit").addEventListener("click", calculateAndSubmit);
+    };
+  </script>
+</head>
+<body>
+  <h2>QA Scorecard</h2>
+
+  <label for="tone">Tone:</label>
+  <select id="tone">
+    <option value="0">0</option><option value="1">1</option><option value="2">2</option>
+    <option value="3">3</option><option value="4">4</option><option value="5">5</option>
+  </select>
+
+  <label for="process">Process:</label>
+  <select id="process">
+    <option value="0">0</option><option value="1">1</option><option value="2">2</option>
+    <option value="3">3</option><option value="4">4</option><option value="5">5</option>
+  </select>
+
+  <label for="resolution">Resolution:</label>
+  <select id="resolution">
+    <option value="0">0</option><option value="1">1</option><option value="2">2</option>
+    <option value="3">3</option><option value="4">4</option><option value="5">5</option>
+  </select>
+
+  <label for="fields">Fields Populated:</label>
+  <select id="fields">
+    <option value="0">0</option><option value="1">1</option><option value="2">2</option>
+    <option value="3">3</option><option value="4">4</option><option value="5">5</option>
+  </select>
+
+  <label for="comments">Comments:</label>
+  <textarea id="comments" rows="4" placeholder="Add your comments here..."></textarea>
+
+  <button id="submit">Submit</button>
+</body>
+</html>
