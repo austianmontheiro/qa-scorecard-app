@@ -40,31 +40,46 @@
 
     <!-- Zendesk SDK + Logic -->
     <script src="https://assets.zendesk.com/apps/sdk/2.0/zaf_sdk.js"></script>
-    <script>
-      const client = ZAFClient.init();
+<script>
+  const client = ZAFClient.init();
 
-      document.getElementById("submitButton").addEventListener("click", function () {
-        const scores = [
-          parseInt(document.getElementById("tone").value),
-          parseInt(document.getElementById("process").value),
-          parseInt(document.getElementById("fields").value),
-          parseInt(document.getElementById("resolution").value)
-        ];
+  document.getElementById("submitButton").addEventListener("click", async function () {
+    const scores = [
+      parseInt(document.getElementById("tone").value),
+      parseInt(document.getElementById("process").value),
+      parseInt(document.getElementById("fields").value),
+      parseInt(document.getElementById("resolution").value)
+    ];
 
-        const average = (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(2);
-        const comments = document.getElementById("comments").value;
+    const average = (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(2);
+    const comments = document.getElementById("comments").value;
 
-        document.getElementById("averageDisplay").innerText = "Average: " + average;
-        
-        client.set({
-          "ticket.customField:custom_field_33385938861591": average,
-          "ticket.customField:custom_field_33385749219223": comments
-        }).then(() => {
-          console.log("QA Score updated to:", average);
-          console.log("QA Comments updated to:", comments);
-          alert("QA Score and Comments saved to ticket!");
-        });
+    document.getElementById("averageDisplay").innerText = "Average: " + average;
+
+    try {
+      const ticketData = await client.get('ticket.id');
+      const ticketId = ticketData['ticket.id'];
+
+      await client.request({
+        url: `/api/v2/tickets/${ticketId}.json`,
+        type: 'PUT',
+        contentType: 'application/json',
+        data: JSON.stringify({
+          ticket: {
+            comment: {
+              body: `🎯 QA Score: ${average}\n📝 Comments: ${comments}`,
+              public: false
+            }
+          }
+        })
       });
-    </script>
+
+      alert("Internal note added to ticket!");
+    } catch (error) {
+      console.error("Error posting comment:", error);
+      alert("Failed to add internal note.");
+    }
+  });
+</script>
   </body>
 </html>
