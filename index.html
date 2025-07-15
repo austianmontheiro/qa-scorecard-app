@@ -43,43 +43,51 @@
 <script>
   const client = ZAFClient.init();
 
-  document.getElementById("submitButton").addEventListener("click", async function () {
-    const scores = [
-      parseInt(document.getElementById("tone").value),
-      parseInt(document.getElementById("process").value),
-      parseInt(document.getElementById("fields").value),
-      parseInt(document.getElementById("resolution").value)
-    ];
+document.getElementById("submitButton").addEventListener("click", async function () {
+  const scores = [
+    parseInt(document.getElementById("tone").value),
+    parseInt(document.getElementById("process").value),
+    parseInt(document.getElementById("fields").value),
+    parseInt(document.getElementById("resolution").value)
+  ];
 
-    const average = (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(2);
-    const comments = document.getElementById("comments").value;
+  const average = (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(2);
+  const comments = document.getElementById("comments").value;
 
-    document.getElementById("averageDisplay").innerText = "Average: " + average;
+  document.getElementById("averageDisplay").innerText = "Average: " + average;
 
-    try {
-      const ticketData = await client.get('ticket.id');
-      const ticketId = ticketData['ticket.id'];
+  try {
+    const ticketData = await client.get('ticket.id');
+    const ticketId = ticketData['ticket.id'];
 
-      await client.request({
-        url: `/api/v2/tickets/${ticketId}.json`,
-        type: 'PUT',
-        contentType: 'application/json',
-        data: JSON.stringify({
-          ticket: {
-            comment: {
-              body: `🎯 QA Score: ${average}\n📝 Comments: ${comments}`,
-              public: false
-            }
+    // Update hidden fields (QA Score and QA Comments)
+    await client.set({
+      'ticket.customField:custom_field_33385938861591': average,
+      'ticket.customField:custom_field_33385749219223': comments
+    });
+
+    // Add internal note
+    await client.request({
+      url: `/api/v2/tickets/${ticketId}.json`,
+      type: 'PUT',
+      contentType: 'application/json',
+      data: JSON.stringify({
+        ticket: {
+          comment: {
+            body: `🎯 QA Score: ${average}\n📝 Comments: ${comments}`,
+            public: false
           }
-        })
-      });
+        }
+      })
+    });
 
-      alert("Internal note added to ticket!");
-    } catch (error) {
-      console.error("Error posting comment:", error);
-      alert("Failed to add internal note.");
-    }
-  });
+    alert("QA score submitted and fields updated!");
+  } catch (error) {
+    console.error("Error posting comment or updating fields:", error);
+    alert("Failed to complete QA update.");
+  }
+});
+
 </script>
   </body>
 </html>
